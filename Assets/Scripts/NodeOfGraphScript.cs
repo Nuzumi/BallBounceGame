@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class NodeOfGraphScript : MonoBehaviour {
 
+    public float multiplier;
     public float weight;
     public float minDist;
     public bool predicted;
@@ -38,7 +39,7 @@ public class NodeOfGraphScript : MonoBehaviour {
         predicted = false;
         once = false;
         minDist = 1000000;
-        weight = Mathf.Abs(gameObject.transform.position.y) +1;
+        weight = (Mathf.Abs(gameObject.transform.position.y) +1)*multiplier;
 
         packNeiList();
     }
@@ -135,11 +136,8 @@ public class NodeOfGraphScript : MonoBehaviour {
             }
             else
             {
-                if((distance(tagArray[i].transform.position) < 1.1f && tagArray[i].transform.position != transform.position 
-                    && !tagArray[i].gameObject.GetComponent<NodeOfGraphScript>().canBounce) 
-                    || ( distance(tagArray[i].transform.position) >= 1.1f && distance(tagArray[i].transform.position) < 1.5f 
-                    && ( Mathf.Abs(tagArray[i].transform.position.x) != ( mainControler.GetComponent<MainGameControlerScript>().width-1)/2 
-                    || Mathf.Abs(tagArray[i].transform.position.y)>((mainControler.GetComponent<MainGameControlerScript>().goalHeight/2)+1))))
+                if((distance(tagArray[i].transform.position) < 1.5f && tagArray[i].transform.position != transform.position 
+                    && !tagArray[i].gameObject.GetComponent<NodeOfGraphScript>().canBounce))
                 {
                     neighbourhoodNoodeList.Add(tagArray[i]);
                 }

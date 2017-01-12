@@ -23,6 +23,7 @@ public class MainGameControlerScript : MonoBehaviour {
     private GameObject oldStartNode;
     private GameObject winingMidleNode;
     private List<GameObject> allNodesList;
+    private List<GameObject> pathMain;
     private bool once;
     private bool isAi;
     private bool isCurrentPlayer1;
@@ -54,9 +55,10 @@ public class MainGameControlerScript : MonoBehaviour {
         player1Goalx = (int)fromPosition.x ;
         winCanvas.enabled = false;
         GameObject[] infoArray = GameObject.FindGameObjectsWithTag("InfoObject");
+        pathMain = new List<GameObject>();
         nodeExclude = new GameObject();
-        isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
-        //isAi = true;
+        //isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
+        isAi = true;
 
     }
 
@@ -99,7 +101,7 @@ public class MainGameControlerScript : MonoBehaviour {
        
     }
 
-    void getNewStartNode(List<GameObject> path)
+    void getNewStartNode(List<GameObject> path,bool toEnd)
     {
         
         for(int i = 0; i < path.Count; i++)
@@ -115,7 +117,19 @@ public class MainGameControlerScript : MonoBehaviour {
             drawLine(oldStartNode.transform.position, startNode.transform.position, Color.black,false);
         }
 
-        makeMove();
+        if (!toEnd)
+        {
+            makeMove();
+        }
+        else
+        {
+            startNode.SendMessage("makeNeighbourShine", true);
+            startNode.SendMessage("changeColorTo", player1Color);
+            isCurrentPlayer1 = true;
+            turnInfotext.text = "PLAYER1";
+            turnInfotext.color = player1Color;
+        }
+        
     }
 
     void drawLine(Vector3 start, Vector3 end, Color color,bool fade)
@@ -320,6 +334,61 @@ public class MainGameControlerScript : MonoBehaviour {
         
     }
 
+    void makeMoveVer2()
+    {
+        List<GameObject> nodeList = makeListOfNotBouncing(startNode);
+        List<GameObject> bouncingNodeList = startNode.GetComponent<NodeOfGraphScript>().bouncingNeighbourList;
+        List<GameObject> potencialePath = new List<GameObject>();
+        GameObject bestNode = null;
+        bool was = false;
+
+        for(int i = pathMain.Count-1; i != 0; i--)
+        {
+            if (nodeList.Contains(pathMain[i]))
+            {
+                bestNode = pathMain[i];
+            }
+        }
+
+        if(bestNode == null)
+        {
+            Debug.Log("null no zesz");
+            makeMove();
+        }
+        else
+        {
+            //przydalo by sie sprawdzic czy moge tam isc przez odbicie // no i jest
+            foreach(GameObject elem in bouncingNodeList)
+            {
+                if (makeListOfNotBouncing(elem).Contains(bestNode))
+                {
+                    if (was)
+                    {
+                        potencialePath.Clear();
+                    }
+
+                    was = true;
+                    potencialePath.Add(elem);
+                }
+            }
+            potencialePath.Add(bestNode);
+
+            if(potencialePath.Count == 2)
+            {
+                Debug.Log("potencial path");
+                getNewStartNode(potencialePath,true);
+            }
+            else
+            {
+
+                getNewStartNode(bestNode);
+            }
+
+        }
+
+
+    }
+
     bool isUsingPathGood(GameObject bestPathOutcome,GameObject nodeToStart)
     {
         GameObject pathOutcome = findBestNode(bestPathOutcome, makeListOfNotBouncing(bestPathOutcome), true);
@@ -349,7 +418,6 @@ public class MainGameControlerScript : MonoBehaviour {
                 turnInfotext.text = "PLAYER2";
                 turnInfotext.color = player2Color;
                 computePath(startNode,false,true);
-                debList(getPath(findBestNode(startNode,makeListOfEveryNodeOfPath(),true)));
                 makeMoveMediumForNow();
             }
             else
@@ -384,15 +452,6 @@ public class MainGameControlerScript : MonoBehaviour {
                 isCurrentPlayer1 = false;
                 turnInfotext.text = "PLAYER2";
                 turnInfotext.color = player2Color;
-                GameObject someNodeToDoSth = findWhereToGo();
-                if (someNodeToDoSth != null)
-                {
-                    Debug.Log(someNodeToDoSth.transform.position + " to jest to");
-                }
-                else
-                {
-                    Debug.Log("no kurwa nie");
-                }
                 computePath(startNode,false,true);
                 GameObject bestNode = findBestNode(startNode, makeListOfEveryNodeOfPath(),true);
                 List <GameObject> path = getPath(bestNode);
@@ -403,7 +462,7 @@ public class MainGameControlerScript : MonoBehaviour {
                     {
                         Debug.Log("path used");
                         path.RemoveAt(0);
-                        getNewStartNode(path);
+                        getNewStartNode(path,false);
                     }else
                     {
                         Debug.Log("path not used");
@@ -451,33 +510,12 @@ public class MainGameControlerScript : MonoBehaviour {
                 GameObject someNodeToDoSth = findWhereToGo();
                 if (someNodeToDoSth != null)
                 {
-                    getNewStartNode(getPath(someNodeToDoSth));
+                    getNewStartNode(getPath(someNodeToDoSth),false);
                 }
                 else
                 {
-                    makeMove();
+                    makeMoveVer2();
                 }
-              /*
-                if (path.Count > 1)
-                {
-                    Debug.Log("path can be used");
-                    if (isUsingPathGood(bestNode, startNode))
-                    {
-                        Debug.Log("path used");
-                        path.RemoveAt(0);
-                        getNewStartNode(path);
-                    }
-                    else
-                    {
-                        Debug.Log("path not used");
-                        makeMove();
-                    }
-
-                }
-                else
-                {
-                    makeMove();
-                }*/
 
             }
             else
@@ -497,7 +535,8 @@ public class MainGameControlerScript : MonoBehaviour {
             else
             {
                 startNode.SendMessage("changeColorTo", player2Color);
-                makeRandomMove(0);
+                //makeRandomMove(0);
+                makeMoveVer2();
             }
         }
     }
@@ -860,6 +899,7 @@ public class MainGameControlerScript : MonoBehaviour {
         }
 
         path.Reverse();
+        pathMain = path;
         return path;
     }
 
@@ -933,8 +973,6 @@ public class MainGameControlerScript : MonoBehaviour {
     {
         computePath(startNode, false, false);//cala siatka
         List<GameObject> everyNodeOfPathToWin = getPath(winingMidleNode);
-       // Debug.Log("droga z calej siatki");
-       // debList(everyNodeOfPathToWin);
         computePath(startNode, false, true);//siatka dostepna
         List<GameObject> whereCanIGo = makeListOfEveryNodeOfPath();
         List<GameObject> listToSearch = new List<GameObject>();
@@ -974,6 +1012,7 @@ public class MainGameControlerScript : MonoBehaviour {
                 }
             }
         }
+
         return null;
     }
 
