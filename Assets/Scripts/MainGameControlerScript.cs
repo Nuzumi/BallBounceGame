@@ -55,8 +55,8 @@ public class MainGameControlerScript : MonoBehaviour {
         winCanvas.enabled = false;
         GameObject[] infoArray = GameObject.FindGameObjectsWithTag("InfoObject");
         nodeExclude = new GameObject();
-        //isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
-        isAi = true;
+        isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
+        //isAi = true;
 
     }
 

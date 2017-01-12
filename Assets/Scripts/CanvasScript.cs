@@ -16,4 +16,11 @@ public class CanvasScript : MonoBehaviour {
     {
         Application.Quit();
     }
+    
+    public void backPress()
+    {
+        GameObject[] tab = GameObject.FindGameObjectsWithTag("InfoObject");
+        Destroy(tab[0]);
+        SceneManager.LoadScene("MainMenu");
+    }
 }
