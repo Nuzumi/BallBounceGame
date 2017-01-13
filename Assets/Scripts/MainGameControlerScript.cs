@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using Assets.Scripts;
 
 public class MainGameControlerScript : MonoBehaviour {
 
@@ -357,32 +358,54 @@ public class MainGameControlerScript : MonoBehaviour {
         }
         else
         {
-            //przydalo by sie sprawdzic czy moge tam isc przez odbicie // no i jest
-            foreach(GameObject elem in bouncingNodeList)
-            {
-                if (makeListOfNotBouncing(elem).Contains(bestNode))
-                {
-                    if (was)
-                    {
-                        potencialePath.Clear();
-                    }
 
-                    was = true;
-                    potencialePath.Add(elem);
+            for(int i = 0; i< bouncingNodeList.Count && !was;i++)                      //each(GameObject elem in bouncingNodeList)
+            {
+                List<GameObject> afterBounseNodeList = makeListOfNotBouncing(bouncingNodeList[i]);
+
+                for (int j = pathMain.Count - 1; j != 0; j--)
+                {
+                    if (afterBounseNodeList.Contains(pathMain[j]))
+                    {
+                        bestNode = pathMain[j];
+                        potencialePath.Add(bouncingNodeList[i]);
+                        potencialePath.Add(pathMain[j]);
+                        was = true;
+                    }
                 }
             }
-            potencialePath.Add(bestNode);
 
-            if(potencialePath.Count == 2)
+
+            if (!was)
+            {
+                Debug.Log("miejsce z pirwszego");
+                //przydalo by sie sprawdzic czy moge tam isc przez odbicie // no i jest
+                foreach (GameObject elem in bouncingNodeList)
+                {
+                    if (makeListOfNotBouncing(elem).Contains(bestNode))
+                    {
+                        if (was)
+                        {
+                            potencialePath.Clear();
+                        }
+
+                        was = true;
+                        potencialePath.Add(elem);
+                    }
+                }
+                potencialePath.Add(bestNode);
+            }
+
+            if (potencialePath.Count == 2)
             {
                 Debug.Log("potencial path");
-                getNewStartNode(potencialePath,true);
+                getNewStartNode(potencialePath, true);
             }
             else
             {
-
-                getNewStartNode(bestNode);
+               getNewStartNode(bestNode);
             }
+            
 
         }
 
@@ -857,12 +880,14 @@ public class MainGameControlerScript : MonoBehaviour {
         }
         source.SendMessage("setMinDist",0.0f);
 
-        Queue<GameObject> nodeQueue = new Queue<GameObject>();
-        nodeQueue.Enqueue(source);
+      //  Queue<GameObject> nodeQueue = new Queue<GameObject>();
+        PriorityQueue nodePriorityQueue = new PriorityQueue();
+        nodePriorityQueue.enqueue(source);
+       // nodeQueue.Enqueue(source);
 
-        while(nodeQueue.Count != 0)
+        while(nodePriorityQueue.count() != 0)
         {
-            GameObject someNode = nodeQueue.Dequeue();
+            GameObject someNode = nodePriorityQueue.dequeue();
             List<GameObject> nodeList = new List<GameObject>();
 
             if (bouncing)
@@ -880,10 +905,10 @@ public class MainGameControlerScript : MonoBehaviour {
                 float distanceThroughN = someNode.GetComponent<NodeOfGraphScript>().minDist + someNode.GetComponent<NodeOfGraphScript>().weight;
                 if (distanceThroughN < diffrentNode.GetComponent<NodeOfGraphScript>().minDist)
                 {
-                    nodeQueue = removeFromQueue(nodeQueue, diffrentNode);
+                    nodePriorityQueue.remove(diffrentNode);// = removeFromQueue(nodeQueue, diffrentNode);
                     diffrentNode.SendMessage("setMinDist",distanceThroughN);
                     diffrentNode.SendMessage("setPrevious", someNode);
-                    nodeQueue.Enqueue(diffrentNode);
+                    nodePriorityQueue.enqueue(diffrentNode);
                 }
             }
         }
@@ -973,6 +998,7 @@ public class MainGameControlerScript : MonoBehaviour {
     {
         computePath(startNode, false, false);//cala siatka
         List<GameObject> everyNodeOfPathToWin = getPath(winingMidleNode);
+        debList(everyNodeOfPathToWin);
         computePath(startNode, false, true);//siatka dostepna
         List<GameObject> whereCanIGo = makeListOfEveryNodeOfPath();
         List<GameObject> listToSearch = new List<GameObject>();

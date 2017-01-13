@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class NodeOfGraphScript : MonoBehaviour {
 
+    public float weightAftherCanBounce;
     public float multiplier;
     public float weight;
     public float minDist;
@@ -38,8 +39,8 @@ public class NodeOfGraphScript : MonoBehaviour {
         isShining = false;
         predicted = false;
         once = false;
-        minDist = 1000000;
-        weight = (Mathf.Abs(gameObject.transform.position.y) +1)*multiplier;
+        minDist = (float)double.PositiveInfinity;
+        weight = weightMake();
 
         packNeiList();
     }
@@ -119,6 +120,7 @@ public class NodeOfGraphScript : MonoBehaviour {
     {
         canBounce = true;
         canBounceMarker.enabled = true;
+        weight = weightAftherCanBounce;
     }
 
     void packNeiList()
@@ -156,7 +158,7 @@ public class NodeOfGraphScript : MonoBehaviour {
         bouncingNeighbourList = new List<GameObject>();
         predicted = false;
         previous = null;
-        minDist = 1000000;
+        minDist = (float)double.PositiveInfinity;
         fillBouncingNeighbourList(element);
     }
 
@@ -192,4 +194,16 @@ public class NodeOfGraphScript : MonoBehaviour {
 
         mainControler.SendMessage("getNewStartNode", nodeToGo);
     }*/
+
+    float weightMake()
+    {
+        if(transform.position.y == 0)
+        {
+            return 3.0f;
+        }
+        else
+        {
+            return Mathf.Pow(Mathf.Abs(transform.position.y)+2, multiplier);
+        }
+    }
 }
