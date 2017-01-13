@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scens/PlayScrean.unity
+- path: Assets/Scens/MainMenu.unity
   isLoaded: 1
   isActive: 1

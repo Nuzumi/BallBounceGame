@@ -40,7 +40,7 @@ public class NodeOfGraphScript : MonoBehaviour {
         predicted = false;
         once = false;
         minDist = (float)double.PositiveInfinity;
-        weight = weightMake();
+        choseWeightType();
 
         packNeiList();
     }
@@ -204,6 +204,36 @@ public class NodeOfGraphScript : MonoBehaviour {
         else
         {
             return Mathf.Pow(Mathf.Abs(transform.position.y)+2, multiplier);
+        }
+    } //linie poziome
+
+    float weightMakeRandom()
+    {
+        return Random.Range(7, 150);
+    } // randomowe
+
+    float weightMakeCircle()
+    {
+        return Mathf.Pow(transform.position.x, 2) + Mathf.Pow(transform.position.y, 2)+multiplier*2;
+    } // kola
+
+    void choseWeightType()
+    {
+        int type = GameObject.FindGameObjectsWithTag("InfoObject")[0].GetComponent<InfoObjectScript>().weightCase;
+
+        switch (type)
+        {
+            case 1:
+                weight = weightMake();
+                break;
+
+            case 2:
+                weight = weightMakeCircle();
+                break;
+
+            default:
+                weight = weightMakeRandom();
+                break;
         }
     }
 }

@@ -58,8 +58,8 @@ public class MainGameControlerScript : MonoBehaviour {
         GameObject[] infoArray = GameObject.FindGameObjectsWithTag("InfoObject");
         pathMain = new List<GameObject>();
         nodeExclude = new GameObject();
-        //isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
-        isAi = true;
+        isAi =infoArray[0].GetComponent<InfoObjectScript>().isAi;
+        //isAi = true;
 
     }
 
